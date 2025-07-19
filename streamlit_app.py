@@ -10,7 +10,7 @@ from qc_radar import qc_radar_app
 from insight_dashboard import insight_dashboard_app
 from processor import PDFTextSearcher
 import os
-
+import tempfile
 
 # Set page configuration
 st.set_page_config(layout="wide")
