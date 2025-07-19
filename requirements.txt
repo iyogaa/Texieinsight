@@ -32,3 +32,4 @@ streamlit-lottie
 requests
 joblib
 earthengine-api
+tempfile
