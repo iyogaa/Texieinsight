@@ -1,32 +1,32 @@
 # Core Streamlit and PDF Processing
-streamlit==1.28.0
-PyPDF2==3.0.1
-pymupdf==1.23.5  # Alternative PDF processor (faster than PyPDF2)
-pdf2image==1.16.3
-pytesseract==0.3.10
-Pillow==10.0.1
+streamlit
+PyPDF2
+pymupdf  # Alternative PDF processor (faster than PyPDF2)
+pdf2image
+pytesseract
+Pillow
 
 # Data Processing
-pandas==2.0.3
-numpy==1.24.3
-openpyxl==3.1.2  # For Excel support
-python-dateutil==2.8.2
-pytz==2023.3
+pandas
+numpy
+openpyxl  # For Excel support
+python-dateutil
+pytz
 
 # Text Processing and Search
-sentence-transformers==2.2.2
-thefuzz==0.19.0
-python-Levenshtein==0.21.1
-fuzzywuzzy==0.18.0
+sentence-transformers
+thefuzz
+python-Levenshtein
+fuzzywuzzy
 
 # Visualization
-matplotlib==3.7.2
-plotly==5.15.0
-pydeck==0.8.1b0
+matplotlib
+plotly
+pydeck
 
 # Streamlit Extensions
-streamlit-aggrid==0.3.4
-streamlit-lottie==0.0.5
+streamlit-aggrid
+streamlit-lottie
 
 # Other Utilities
 requests==2.31.0
