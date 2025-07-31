@@ -243,8 +243,105 @@ elif menu == "Truckings IFTA":
 
 # Riscom MVR tool
 elif menu == "Riscom MVR":
-    st.markdown('<div class="custom-heading">Riscom MVR Tool</div>', unsafe_allow_html=True)
-    st.write("Riscom MVR tool will be available soon.")
+    st.markdown('<div class="custom-heading">Riscom Tool</div>', unsafe_allow_html=True)
+    input_text = st.text_area("You can paste the Fullnames here:", height=150, placeholder="""
+    Example:
+    Kungfu, Panda
+    Chotta, Bheem
+    Walter, White
+    Yoga, Raj
+    Kishoor, Aravindh
+    Gokul, Sarvesh
+    Jackie, Chan
+    """)
+
+    def parse_name(full_name):
+        original = full_name.strip()
+        if ',' in original:
+            last, first = [p.strip() for p in original.split(',', 1)]
+        else:
+            tokens = original.split()
+            if len(tokens) >= 2:
+                first = " ".join(tokens[:-1])
+                last = tokens[-1]
+            else:
+                first, last = original, ""
+        return {
+            "Full Name": original,
+            "First Name": first,
+            "Last Name": last
+        }
+
+    # When user inputs text
+    if input_text:
+        names = [line.strip() for line in input_text.strip().split('\n') if line.strip()]
+        parsed_data = [parse_name(name) for name in names]
+        df = pd.DataFrame(parsed_data)
+
+        # Format as tab-separated values
+        output_text = df.to_csv(index=False, sep='\t')
+
+        # Display copy-to-clipboard button
+        st.subheader("📎 Copy Output")
+        st.code(output_text, language='text')
+
+        # Copy button with stateful feedback
+        if st.button("📋 Copy to Clipboard"):
+            st.toast("✅ Copied successfully!", icon="✅")
+            st.session_state.clipboard_text = output_text
+    
+    input_dates = st.text_area("Enter D.O.B :", height=250, placeholder="""
+    9-21-2002
+    28-09-1989
+    """)
+
+    def parse_and_format_date(date_str):
+        # Normalize separators
+        clean_date = re.sub(r'[.\s]+', '-', date_str.strip())
+        parts = re.split(r'[-/]', clean_date)
+
+        try:
+            # Try MM-DD-YYYY
+            if int(parts[0]) > 12:
+                # Assume DD-MM-YYYY
+                day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
+            else:
+                # Assume MM-DD-YYYY
+                month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
+            formatted = datetime(year, month, day)
+            return formatted.strftime("%m/%d/%Y"), calculate_age(formatted)
+        except:
+            return "Invalid Date", ""
+
+    def calculate_age(birthdate):
+        today = datetime.today()
+        return today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+
+    # Process
+    if input_dates:
+        rows = []
+        for line in input_dates.strip().split('\n'):
+            original = line.strip()
+            if not original:
+                continue
+            formatted_date, age = parse_and_format_date(original)
+            flag = ""
+            if isinstance(age, int):
+                if age < 21:
+                    flag = "<21 (Underage)"
+                elif age > 69:
+                    flag = ">70 (Overage)"
+            rows.append({
+                "Formatted DOB": formatted_date,
+                "Age": age,
+                "Flag": flag
+            })
+
+        df = pd.DataFrame(rows)
+
+        st.subheader("Results")
+        output_text = df.to_csv(index=False, sep='\t')
+        st.code(output_text, language='text')
 
 # MVR GPT tool (accessible to all roles)
 elif menu == "MVR GPT":
