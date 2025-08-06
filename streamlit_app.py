@@ -87,7 +87,8 @@ credentials = {
     "yogaraj": {"password": "afreen", "role": "ADMIN"},
     "Maha": {"password": "Maha@129", "role": "QA"},
     "Gokul": {"password": "reddead", "role": "QA"},
-    "user": {"password": "ssapopb", "role": "MAKER"}
+    "user": {"password": "ssapopb", "role": "MAKER"},
+    "bharti_sawan": {"password": "sawan@agoy", "role": "QA"},
 }
 
 # --- Authentication Function ---
