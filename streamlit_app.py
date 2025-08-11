@@ -240,11 +240,6 @@ elif menu == "QC Radar":
 elif menu == "Truckings IFTA":
     st.markdown('<div class="custom-heading">Truckings IFTA Tool</div>', unsafe_allow_html=True)
     st.write("Truckings IFTA tool will be available soon.")
-
-# Riscom MVR tool
-#elif menu == "Riscom MVR":
-   # st.markdown('<div class="custom-heading">Riscom Tool</div>', unsafe_allow_html=True)
-# MVR GPT tool (accessible to all roles)
 elif menu == "MVR GPT":
     mvr_gpt_app()
 elif menu == "Insight Dashboard":
