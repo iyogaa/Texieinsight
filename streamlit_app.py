@@ -245,56 +245,6 @@ elif menu == "Truckings IFTA":
 # Riscom MVR tool
 elif menu == "Riscom MVR":
     st.markdown('<div class="custom-heading">Riscom Tool</div>', unsafe_allow_html=True)
-    input_text = st.text_area("You can paste the Fullnames here:", height=150, placeholder="""
-    Example:
-    Kungfu, Panda
-    Chotta, Bheem
-    Walter, White
-    Yoga, Raj
-    Kishoor, Aravindh
-    Gokul, Sarvesh
-    Jackie, Chan
-    """)
-
-    def parse_name(full_name):
-        original = full_name.strip()
-        if ',' in original:
-            last, first = [p.strip() for p in original.split(',', 1)]
-        else:
-            tokens = original.split()
-            if len(tokens) >= 2:
-                first = " ".join(tokens[:-1])
-                last = tokens[-1]
-            else:
-                first, last = original, ""
-        return {
-            "Full Name": original,
-            "First Name": first,
-            "Last Name": last
-        }
-
-    # When user inputs text
-    if input_text:
-        names = [line.strip() for line in input_text.strip().split('\n') if line.strip()]
-        parsed_data = [parse_name(name) for name in names]
-        df = pd.DataFrame(parsed_data)
-
-        # Format as tab-separated values
-        output_text = df.to_csv(index=False, sep='\t')
-
-        # Display copy-to-clipboard button
-        st.subheader("📎 Copy Output")
-        st.code(output_text, language='text')
-
-        # Copy button with stateful feedback
-        if st.button("📋 Copy to Clipboard"):
-            st.toast("✅ Copied successfully!", icon="✅")
-            st.session_state.clipboard_text = output_text
-    
-    input_dates = st.text_area("Enter D.O.B :", height=250, placeholder="""
-    9-21-2002
-    28-09-1989
-    """)
 
     def parse_and_format_date(date_str):
         # Normalize separators
