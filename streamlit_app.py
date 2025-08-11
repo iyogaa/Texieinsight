@@ -243,8 +243,8 @@ elif menu == "Truckings IFTA":
     st.write("Truckings IFTA tool will be available soon.")
 
 # Riscom MVR tool
-elif menu == "Riscom MVR":
-    st.markdown('<div class="custom-heading">Riscom Tool</div>', unsafe_allow_html=True)
+#elif menu == "Riscom MVR":
+   # st.markdown('<div class="custom-heading">Riscom Tool</div>', unsafe_allow_html=True)
 # MVR GPT tool (accessible to all roles)
 elif menu == "MVR GPT":
     mvr_gpt_app()
