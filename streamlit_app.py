@@ -245,55 +245,6 @@ elif menu == "Truckings IFTA":
 # Riscom MVR tool
 elif menu == "Riscom MVR":
     st.markdown('<div class="custom-heading">Riscom Tool</div>', unsafe_allow_html=True)
-
-    def parse_and_format_date(date_str):
-        # Normalize separators
-        clean_date = re.sub(r'[.\s]+', '-', date_str.strip())
-        parts = re.split(r'[-/]', clean_date)
-
-        try:
-            # Try MM-DD-YYYY
-            if int(parts[0]) > 12:
-                # Assume DD-MM-YYYY
-                day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
-            else:
-                # Assume MM-DD-YYYY
-                month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
-            formatted = datetime(year, month, day)
-            return formatted.strftime("%m/%d/%Y"), calculate_age(formatted)
-        except:
-            return "Invalid Date", ""
-
-    def calculate_age(birthdate):
-        today = datetime.today()
-        return today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
-
-    # Process
-    if input_dates:
-        rows = []
-        for line in input_dates.strip().split('\n'):
-            original = line.strip()
-            if not original:
-                continue
-            formatted_date, age = parse_and_format_date(original)
-            flag = ""
-            if isinstance(age, int):
-                if age < 21:
-                    flag = "<21 (Underage)"
-                elif age > 69:
-                    flag = ">70 (Overage)"
-            rows.append({
-                "Formatted DOB": formatted_date,
-                "Age": age,
-                "Flag": flag
-            })
-
-        df = pd.DataFrame(rows)
-
-        st.subheader("Results")
-        output_text = df.to_csv(index=False, sep='\t')
-        st.code(output_text, language='text')
-
 # MVR GPT tool (accessible to all roles)
 elif menu == "MVR GPT":
     mvr_gpt_app()
