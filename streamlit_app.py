@@ -152,86 +152,9 @@ with st.sidebar:
         st.rerun()
     st.caption("Built with Yogaraj ")
 
-# --- EXACT CORE LOGIC FROM YOUR PROVIDED CODE ---
-def normalize_name(name):
-    """Enhanced name normalization with title removal and initials handling"""
-    if pd.isna(name) or not name:
-        return []
-    name = str(name).lower()
-    # Remove common prefixes/suffixes
-    name = re.sub(r'\b(mr|mrs|ms|dr|jr|sr|iii|ii|iv)\b', '', name)
-    # Remove non-alpha chars except spaces
-    name = re.sub(r'[^a-z\s]', '', name)
-    # Normalize spaces
-    name = re.sub(r'\s+', ' ', name).strip()
-    parts = name.split()
-    if not parts:
-        return []
-
-    formats = []
-    # Full name normal
-    formats.append(' '.join(parts))
-    # First last and last first formats
-    if len(parts) > 1:
-        formats.append(f"{parts[0]} {parts[-1]}")
-        formats.append(f"{parts[-1]} {parts[0]}")
-        formats.append(f"{parts[0]}{parts[-1]}")
-        formats.append(f"{parts[-1]}{parts[0]}")
-
-    # Initial-based formats if middle names exist
-    if len(parts) > 2:
-        first = parts[0]
-        last = parts[-1]
-        initials = ''.join([p[0] for p in parts[1:-1]])
-        formats.append(f"{first} {initials} {last}")
-        formats.append(f"{first} {initials}{last}")
-        formats.append(f"{first}{initials} {last}")
-        formats.append(f"{first}{initials}{last}")
-
-    # Remove duplicates
-    return list(set(formats))
-
-def names_match(name1, name2):
-    """Stricter matching with multiple fuzzy strategies"""
-    if pd.isna(name1) or pd.isna(name2) or not name1 or not name2:
-        return False
-    formats1 = normalize_name(name1)
-    formats2 = normalize_name(name2)
-    for f1 in formats1:
-        for f2 in formats2:
-            if f1 == f2:
-                return True
-            if fuzz.token_set_ratio(f1, f2) >= 95:
-                return True
-            if fuzz.partial_ratio(f1, f2) >= 96:
-                return True
-            if fuzz.token_sort_ratio(f1, f2) >= 98:
-                return True
-    return False
-
-def get_valid_column(df, purpose, default_names, required=True):
-    """Find column with fuzzy matching, using defaults if possible"""
-    # First try exact matches to default names
-    for col in default_names:
-        if col in df.columns:
-            return col
-    
-    # Then try fuzzy matching
-    for col_name in default_names:
-        match, score = process.extractOne(col_name, df.columns, scorer=fuzz.ratio)
-        if score > 80:
-            return match
-    
-    # If not found and required, return first column
-    if required and len(df.columns) > 0:
-        return df.columns[0]
-    
-    return None
-# --- END OF EXACT CORE LOGIC ---
-
 # --- Main Application Logic ---
 if menu == "All Trans MVR":
-    all_trans_mvr_app(get_valid_column, names_match)
+    all_trans_mvr_app()
 # Welcome screen for "App" menu
 # HDVI MVR tool
 elif menu == "QC Radar":
