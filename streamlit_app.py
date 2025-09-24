@@ -124,9 +124,9 @@ if not st.session_state["authenticated"]:
 
 # --- Role-based Menu Generator ---
 def get_menu_options(role):
-    base = ["QC Radar", "All Trans MVR", "Supplement", "Riscom MVR", "MVR GPT"]
+    base = ["QC Radar", "All Trans MVR", "Supplement", "Riscom MVR", "MVR GPT","Alltrans Test"]
     if role == "ADMIN":
-        return base + ["Insight Dashboard"]
+        return base 
     elif role == "QA":
         return base
     elif role == "MAKER":
