@@ -102,7 +102,7 @@ class Alltrans:
             if pd.isna(ts):
                 s = str(val).strip()
                 return f"'{s}" if s != "" else None
-            return f"'{ts.strftime('%m/%d/%Y')}"
+            return f"{ts.strftime('%m/%d/%Y')}"
         except Exception:
             s = str(val).strip()
             return f"'{s}" if s != "" else None
@@ -115,7 +115,7 @@ class Alltrans:
             if pd.isna(ts):
                 s = str(val).strip()
                 return f"'{s}" if s != "" else None
-            return f"'{ts.strftime('%m/%d/%Y')}"
+            return f"{ts.strftime('%m/%d/%Y')}"
         except Exception:
             s = str(val).strip()
             return f"'{s}" if s != "" else None
@@ -344,9 +344,9 @@ class Alltrans:
             try:
                 dt = pd.to_datetime(raw_dob, errors="coerce")
                 dob_norm = dt.strftime("%m/%d/%Y") if not pd.isna(dt) else (str(raw_dob).strip() if raw_dob is not None else None)
-                rec["Driver Date of Birth"] = f"'{dob_norm}" if dob_norm else None
+                rec["Driver Date of Birth"] = f"{dob_norm}" if dob_norm else None
             except Exception:
-                rec["Driver Date of Birth"] = f"'{str(raw_dob).strip()}" if raw_dob not in (None, "") else None
+                rec["Driver Date of Birth"] = f"{str(raw_dob).strip()}" if raw_dob not in (None, "") else None
             rec["CDL Number"] = key
             rec["CDL Type"] = group[cdl_type_col].dropna().iloc[0] if (cdl_type_col in group and not group[cdl_type_col].dropna().empty) else None
             rec["Lic State"] = group[lic_state_col].dropna().iloc[0] if (lic_state_col in group and not group[lic_state_col].dropna().empty) else None
@@ -424,7 +424,7 @@ class Alltrans:
             name_val = lr.get("_lookup_name") or lr.get(next((c for c in lookup_df.columns if "name" in str(c).lower()), None), None)
             append_rec["Driver Full Name"] = name_val
             dob_val = lr.get("_lookup_dob") or None
-            append_rec["Driver Date of Birth"] = f"'{dob_val}" if dob_val not in (None, "") else None
+            append_rec["Driver Date of Birth"] = f"{dob_val}" if dob_val not in (None, "") else None
             append_rec["CDL Number"] = lr.get("_cdl_key_norm")
             append_rec["CDL Type"] = None
             append_rec["Lic State"] = None
@@ -569,4 +569,5 @@ class Alltrans:
         out = io.BytesIO()
         wb.save(out)
         out.seek(0)
+
         return out
