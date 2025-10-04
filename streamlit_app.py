@@ -124,7 +124,7 @@ if not st.session_state["authenticated"]:
 
 # --- Role-based Menu Generator ---
 def get_menu_options(role):
-    base = ["QC Radar", "All Trans MVR", "Supplement", "Riscom MVR", "MVR GPT","Alltrans Test"]
+    base = ["MVR All Trans", "Supplement", "MVR GPT","MVR All Trans(test)"]
     if role == "ADMIN":
         return base 
     elif role == "QA":
@@ -153,149 +153,57 @@ with st.sidebar:
     st.caption("Built with Yogaraj ")
 
 # --- Main Application Logic ---
-if menu == "All Trans MVR":
+if menu == "MVR All Trans":
     all_trans_mvr_app()
 # Welcome screen for "App" menu
 # HDVI MVR tool
-elif menu == "QC Radar":
-    qc_radar_app()
+#elif menu == "QC Radar":
+    #qc_radar_app()
 elif menu == "MVR GPT":
     mvr_gpt_app()
-elif menu == "Alltrans Test":
+elif menu == "MVR All Trans(test)":
+    from Alltran import Alltrans
+        # app.py
     import streamlit as st
-    import pandas as pd
-    import io
-    from datetime import datetime
-    from alltrans_test import alltrans
 
-    def main():
-        st.set_page_config(page_title="Alltrans Test", page_icon="🚛", layout="wide")
+    st.set_page_config(page_title="Final Report — app", layout="wide")
+    st.title("Alltrans Test")
 
-        obj = alltrans()
+    #st.write("Upload MAIN (MVR) and LOOKUP files. Template.xlsx must be in the same folder.")
 
-        
-        col1, col2 = st.columns(2)
+    main_file = st.file_uploader("Upload MVR File", type=["xlsx"])
+    lookup_file = st.file_uploader("Upload Client Excel", type=["xlsx","CSV"])
 
-        with col1:
-            st.subheader("MVR Data File")
-            mvr_file = st.file_uploader("Upload MVR Report", type=["xlsx", "xls"], key="mvr_upload")
-        
-        with col2:
-            st.subheader("Client Driver List")
-            client_file = st.file_uploader("Upload Client Driver List", type=["xlsx", "xls", "csv"], key="client_upload")
+    if main_file and lookup_file:
+        try:
+            main_bytes = main_file.read()
+            lookup_bytes = lookup_file.read()
 
-        if not mvr_file or not client_file:
-            st.info("Please upload both MVR and Client files to proceed")
-            return
+            # If lookup workbook has multiple sheets, let user choose
+            from openpyxl import load_workbook
+            lookup_wb = load_workbook(io.BytesIO(lookup_bytes), read_only=True, data_only=True)
+            sheets = lookup_wb.sheetnames
+            chosen_sheet = None
+            if len(sheets) > 1:
+                chosen_sheet = st.selectbox("Lookup workbook has multiple sheets. Choose one:", options=sheets)
+            else:
+                chosen_sheet = sheets[0]
+                st.write(f"From Client Excel: {chosen_sheet}")
 
-        
-        # MVR: Fixed 1 row skip (first row not required)
-        mvr_skip = 1
-        # Client: User input for rows to skip
-        client_skip = st.number_input("Rows to skip in CLIENT file", min_value=0, value=0, key="client_skip")
-        st.info(f"📋 Client file will skip {client_skip} rows")
+            gen = Alltrans(template_path="Template.xlsx",
+                        alltrans_sheet="All Trans",
+                        alltrans_header_row=4,#Fixed constand row for Column Headers
+                        mvr_sheet_name="MVR")
+            out = gen.run(main_bytes, lookup_bytes, chosen_lookup_sheet=chosen_sheet, preview_rows=8)
 
-        if st.button("Process Matching", type="primary", key="process_button"):
-            try:
-                # Load MVR file with fixed 1 row skip, use "MVR" sheet
-                mvr_data = pd.read_excel(mvr_file, skiprows=mvr_skip, sheet_name="MVR")
-                
-                # Load Client file with user-defined rows skip
-                if client_file.name.endswith('.csv'):
-                    client_data = pd.read_csv(client_file, skiprows=client_skip)
-                else:
-                    client_data = pd.read_excel(client_file, skiprows=client_skip)
-
-                st.success(f"MVR Data loaded: {len(mvr_data)} records (skipped {mvr_skip} row)")
-                st.success(f"Client Data loaded: {len(client_data)} drivers (skipped {client_skip} rows)")
-
-                # Show previews
-                col1, col2 = st.columns(2)
-                with col1:
-                    with st.expander("MVR Data Preview"):
-                        st.write("Columns found:", list(mvr_data.columns))
-                        st.dataframe(mvr_data.head(5))
-                with col2:
-                    with st.expander("Client Data Preview"):
-                        st.write("Columns found:", list(client_data.columns))
-                        st.dataframe(client_data.head(5))
-
-                # Auto-detect columns in client file
-                st.subheader("Detected Columns in Client File")
-                client_name_col = obj.get_valid_column(client_data, "driver names", ['name', 'driver_name', 'full_name','Name'])
-                hire_date_col = obj.get_valid_column(client_data, "hire dates", ['hire_date', 'date_of_hire', 'doh'], False)
-                dob_col = obj.get_valid_column(client_data, "date of birth", ['dob', 'date_of_birth', 'birth_date'], False)
-                license_col = obj.get_valid_column(client_data, "license state", ['license_state', 'lic_state', 'state'], False)
-
-                st.write("**Detected Columns:**")
-                st.write(f"- Driver Name: `{client_name_col}`")
-                st.write(f"- Hire Date: `{hire_date_col}`" if hire_date_col else "- Hire Date: Not found")
-                st.write(f"- Date of Birth: `{dob_col}`" if dob_col else "- Date of Birth: Not found")
-                st.write(f"- License State: `{license_col}`" if license_col else "- License State: Not found")
-
-                # Process the data
-                with st.spinner("🔄 Matching drivers and creating All Trans sheet..."):
-                    # Extract drivers from MVR
-                    mvr_drivers = obj.extract_drivers_from_mvr(mvr_data)
-                    
-                    st.info(f"📊 Found {len(mvr_drivers)} unique drivers in MVR data")
-                    
-                    # CORRECTED METHOD CALL: Using match_drivers (not match_drivers_with_hire_date)
-                    all_trans_df = obj.match_drivers(
-                        client_data,      # client data
-                        mvr_drivers,      # MVR drivers  
-                        hire_date_col,    # hire date column
-                        dob_col,          # DOB column
-                        license_col       # license state column
-                    )
-
-                    st.success("Processing completed successfully!")
-                    
-                    # Display results
-                    st.header("Results Summary")
-                    
-                    col1, col2, col3, col4 = st.columns(4)
-                    
-                    license_matches = len(all_trans_df[all_trans_df['Comment'].str.contains('License')])
-                    name_dob_matches = len(all_trans_df[all_trans_df['Comment'].str.contains('Name+DOB')])
-                    missing_mvr = len(all_trans_df[all_trans_df['Comment'] == 'MISSING MVR'])
-                    extra_mvr = len(all_trans_df[all_trans_df['Comment'] == 'Extra MVR record (no client match)'])
-                    total_records = len(all_trans_df)
-                    
-                    col1.metric("Total Records", total_records)
-                    col2.metric("License Matches", license_matches)
-                    col3.metric("Name+DOB Matches", name_dob_matches)
-                    col4.metric("Missing MVR", missing_mvr)
-                    
-                    # Show results table
-                    st.subheader("All Trans Sheet Preview")
-                    st.dataframe(all_trans_df)
-                    
-                    # Download functionality
-                    st.header("💾 Download Results")
-                    
-                    output_bytes = io.BytesIO()
-                    with pd.ExcelWriter(output_bytes, engine='openpyxl') as writer:
-                        all_trans_df.to_excel(writer, sheet_name='All_Trans', index=False)
-                        mvr_data.to_excel(writer, sheet_name='Raw_MVR_Data', index=False)
-                        client_data.to_excel(writer, sheet_name='Raw_Client_Data', index=False)
-                    
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-                    st.download_button(
-                        label="📥 Download All Trans Report",
-                        data=output_bytes.getvalue(),
-                        file_name=f"All_Trans_Report_{timestamp}.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-                    
-            except Exception as e:
-                st.error(f"❌ Error occurred during processing: {str(e)}")
-                import traceback
-                st.error("Full error details:")
-                st.code(traceback.format_exc())
-
-    if __name__ == "__main__":
-        main()
+            original_name = getattr(main_file, "name", None)
+            base = original_name.rsplit(".", 1)[0] if original_name else "Final_Report"
+            out_name = f"{base}.xlsx"
+            st.success("Final report generated")
+            st.download_button("Download Final Report", data=out, file_name=out_name,
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        except Exception as e:
+            st.error(f"Error: {e}")
 elif menu == "Supplement":
     
     # Initialize session state
